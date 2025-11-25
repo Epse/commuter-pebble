@@ -56,9 +56,9 @@ static void window_load(Window *window) {
   // Set up MenuLayer callbacks
   menu_layer_set_callbacks(s_menu_layer, NULL, menu_layer_get_callbacks());
 
-  // Set highlight colors for color platforms
+  // Set highlight colors for color platforms (background, foreground)
   #ifdef PBL_COLOR
-    menu_layer_set_highlight_colors(s_menu_layer, GColorWhite, NMBS_BLUE);
+    menu_layer_set_highlight_colors(s_menu_layer, NMBS_BLUE, GColorWhite);
   #endif
 
   // Add MenuLayer to window

@@ -62,8 +62,12 @@ static void menu_draw_header_callback(GContext *ctx,
                                         void *context) {
   GRect bounds = layer_get_bounds(cell_layer);
 
-  // Draw darker background
-  graphics_context_set_fill_color(ctx, GColorBlack);
+  // Draw header background
+  #ifdef PBL_COLOR
+    graphics_context_set_fill_color(ctx, NMBS_BLUE);
+  #else
+    graphics_context_set_fill_color(ctx, GColorBlack);
+  #endif
   graphics_fill_rect(ctx, bounds, 0, GCornerNone);
 
   // Draw dotted border on top
