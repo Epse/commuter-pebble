@@ -1,6 +1,7 @@
 #include "detail_window.h"
 #include "state.h"
 #include "utils.h"
+#include "types.h"
 
 // UI elements
 static Window *s_detail_window = NULL;
@@ -70,10 +71,18 @@ static void detail_content_update_proc(Layer *layer, GContext *ctx) {
                                       platform_box_size);
 
     if (leg->depart_platform_changed) {
-      graphics_context_set_stroke_color(ctx, GColorBlack);
-      graphics_context_set_stroke_width(ctx, 1);
-      graphics_draw_round_rect(ctx, depart_platform_box, 2);
-      graphics_context_set_text_color(ctx, GColorBlack);
+      #ifdef PBL_COLOR
+        // Red filled box for changed platform
+        graphics_context_set_fill_color(ctx, PLATFORM_CHANGED_COLOR);
+        graphics_fill_rect(ctx, depart_platform_box, 2, GCornersAll);
+        graphics_context_set_text_color(ctx, GColorWhite);
+      #else
+        // Outline for B&W platforms
+        graphics_context_set_stroke_color(ctx, GColorBlack);
+        graphics_context_set_stroke_width(ctx, 1);
+        graphics_draw_round_rect(ctx, depart_platform_box, 2);
+        graphics_context_set_text_color(ctx, GColorBlack);
+      #endif
     } else {
       graphics_context_set_fill_color(ctx, GColorBlack);
       graphics_fill_rect(ctx, depart_platform_box, 2, GCornersAll);
@@ -161,10 +170,18 @@ static void detail_content_update_proc(Layer *layer, GContext *ctx) {
                                       platform_box_size);
 
     if (leg->arrive_platform_changed) {
-      graphics_context_set_stroke_color(ctx, GColorBlack);
-      graphics_context_set_stroke_width(ctx, 1);
-      graphics_draw_round_rect(ctx, arrive_platform_box, 2);
-      graphics_context_set_text_color(ctx, GColorBlack);
+      #ifdef PBL_COLOR
+        // Red filled box for changed platform
+        graphics_context_set_fill_color(ctx, PLATFORM_CHANGED_COLOR);
+        graphics_fill_rect(ctx, arrive_platform_box, 2, GCornersAll);
+        graphics_context_set_text_color(ctx, GColorWhite);
+      #else
+        // Outline for B&W platforms
+        graphics_context_set_stroke_color(ctx, GColorBlack);
+        graphics_context_set_stroke_width(ctx, 1);
+        graphics_draw_round_rect(ctx, arrive_platform_box, 2);
+        graphics_context_set_text_color(ctx, GColorBlack);
+      #endif
     } else {
       graphics_context_set_fill_color(ctx, GColorBlack);
       graphics_fill_rect(ctx, arrive_platform_box, 2, GCornersAll);
@@ -219,7 +236,11 @@ static void detail_window_load(Window *window) {
 
   // Create StatusBarLayer
   s_detail_status_bar = status_bar_layer_create();
-  status_bar_layer_set_colors(s_detail_status_bar, GColorBlack, GColorWhite);
+  #ifdef PBL_COLOR
+    status_bar_layer_set_colors(s_detail_status_bar, NMBS_BLUE, GColorWhite);
+  #else
+    status_bar_layer_set_colors(s_detail_status_bar, GColorBlack, GColorWhite);
+  #endif
   layer_add_child(window_layer, status_bar_layer_get_layer(s_detail_status_bar));
 
   // Calculate bounds for ScrollLayer (below status bar)

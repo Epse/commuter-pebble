@@ -26,7 +26,8 @@ def configure(ctx):
 def build(ctx):
     ctx.load('pebble_sdk')
 
-    build_worker = os.path.exists('worker_src')
+    # Worker disabled - causes SDK build issues
+    build_worker = False
     binaries = []
 
     cached_env = ctx.env

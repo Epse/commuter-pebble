@@ -1,6 +1,7 @@
 #include "menu_layer.h"
 #include "state.h"
 #include "api_handler.h"
+#include "types.h"
 
 // Icon resources (set by menu_layer_init)
 static GBitmap *s_icon_switch = NULL;
@@ -367,7 +368,11 @@ static void menu_draw_row_callback(GContext *ctx,
   }
 
   // Draw masking rectangles to hide overflow text (match the background color)
-  GColor bg_color = selected ? GColorBlack : GColorWhite;
+  #ifdef PBL_COLOR
+    GColor bg_color = selected ? NMBS_BLUE : GColorWhite;
+  #else
+    GColor bg_color = selected ? GColorBlack : GColorWhite;
+  #endif
 
   // Left mask (covers train type box and connection icon if present)
   GRect left_mask = GRect(0, train_type_y, text_margin + train_type_box_width + icon_space + 2, train_type_box_height);
@@ -442,10 +447,16 @@ static void menu_draw_row_callback(GContext *ctx,
 
   // Draw platform box background (drawn last to appear on top)
   if (departure->platform_changed) {
-    // Platform changed - draw outline only
-    graphics_context_set_stroke_color(ctx, platform_bg_color);
-    graphics_context_set_stroke_width(ctx, 1);
-    graphics_draw_round_rect(ctx, platform_box, 2);
+    #ifdef PBL_COLOR
+      // Platform changed - red filled box on color platforms
+      graphics_context_set_fill_color(ctx, PLATFORM_CHANGED_COLOR);
+      graphics_fill_rect(ctx, platform_box, 2, GCornersAll);
+    #else
+      // Platform changed - outline on B&W
+      graphics_context_set_stroke_color(ctx, platform_bg_color);
+      graphics_context_set_stroke_width(ctx, 1);
+      graphics_draw_round_rect(ctx, platform_box, 2);
+    #endif
   } else {
     // Normal platform - filled box
     graphics_context_set_fill_color(ctx, platform_bg_color);
@@ -453,7 +464,11 @@ static void menu_draw_row_callback(GContext *ctx,
   }
 
   // Draw platform number (adjust rect for vertical centering)
-  graphics_context_set_text_color(ctx, departure->platform_changed ? text_color : platform_text_color);
+  #ifdef PBL_COLOR
+    graphics_context_set_text_color(ctx, departure->platform_changed ? GColorWhite : platform_text_color);
+  #else
+    graphics_context_set_text_color(ctx, departure->platform_changed ? text_color : platform_text_color);
+  #endif
   GRect platform_text_rect = platform_box;
   platform_text_rect.origin.y -= 5;  // Lift upward to vertically center larger font
 
