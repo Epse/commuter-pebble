@@ -6,6 +6,7 @@
 #ifdef PBL_COLOR
   #define NMBS_BLUE GColorFromHEX(0x0055AA)
   #define PLATFORM_CHANGED_COLOR GColorRed
+  #define DELAY_COLOR GColorRed
 #endif
 
 // Message type constants (must match JavaScript)
