@@ -1,6 +1,52 @@
 #include "menu_layer.h"
 #include "state.h"
 #include "api_handler.h"
+#include "types.h"
+
+// Platform-specific constants for emery's larger display
+#if PBL_DISPLAY_HEIGHT == 228
+  // Emery (200x228)
+  #define MENU_STATION_ROW_HEIGHT 24
+  #define MENU_TRAIN_ROW_HEIGHT 54
+  #define MENU_PLATFORM_BOX_SIZE 32
+  #define MENU_PLATFORM_BOX_MARGIN 6
+  #define MENU_TRAIN_TYPE_BOX_SIZE 22
+  #define MENU_TRAIN_TYPE_Y 30
+  #define MENU_TEXT_MARGIN 6
+  #define MENU_TIME_RECT_HEIGHT 28
+  #define MENU_ICON_SPACE_EXTRA 24
+  #define MENU_PLATFORM_TEXT_OFFSET 3
+  #define MENU_TIME_FONT FONT_KEY_GOTHIC_24_BOLD
+  #define MENU_TIME_FONT_DELAYED FONT_KEY_GOTHIC_18_BOLD
+  #define MENU_DETAIL_FONT FONT_KEY_GOTHIC_18
+  #define MENU_TRAIN_TYPE_FONT FONT_KEY_GOTHIC_18_BOLD
+  #define MENU_PLATFORM_FONT FONT_KEY_GOTHIC_28_BOLD
+  #define MENU_STATION_FONT FONT_KEY_GOTHIC_24_BOLD
+  #define MENU_HEADER_FONT FONT_KEY_GOTHIC_18_BOLD
+  #define MENU_LOADING_FONT FONT_KEY_GOTHIC_18_BOLD
+  #define MENU_ICON_SIZE 22
+#else
+  // Standard rect displays (144x168)
+  #define MENU_STATION_ROW_HEIGHT 24
+  #define MENU_TRAIN_ROW_HEIGHT 44
+  #define MENU_PLATFORM_BOX_SIZE 24
+  #define MENU_PLATFORM_BOX_MARGIN 4
+  #define MENU_TRAIN_TYPE_BOX_SIZE 16
+  #define MENU_TRAIN_TYPE_Y 22
+  #define MENU_TEXT_MARGIN 4
+  #define MENU_TIME_RECT_HEIGHT 20
+  #define MENU_ICON_SPACE_EXTRA 18
+  #define MENU_PLATFORM_TEXT_OFFSET 5
+  #define MENU_TIME_FONT FONT_KEY_GOTHIC_18_BOLD
+  #define MENU_TIME_FONT_DELAYED FONT_KEY_GOTHIC_14_BOLD
+  #define MENU_DETAIL_FONT FONT_KEY_GOTHIC_14
+  #define MENU_TRAIN_TYPE_FONT FONT_KEY_GOTHIC_14_BOLD
+  #define MENU_PLATFORM_FONT FONT_KEY_GOTHIC_24_BOLD
+  #define MENU_STATION_FONT FONT_KEY_GOTHIC_18_BOLD
+  #define MENU_HEADER_FONT FONT_KEY_GOTHIC_14_BOLD
+  #define MENU_LOADING_FONT FONT_KEY_GOTHIC_14_BOLD
+  #define MENU_ICON_SIZE 16
+#endif
 
 // Icon resources (set by menu_layer_init)
 static GBitmap *s_icon_switch = NULL;
@@ -61,8 +107,12 @@ static void menu_draw_header_callback(GContext *ctx,
                                         void *context) {
   GRect bounds = layer_get_bounds(cell_layer);
 
-  // Draw darker background
-  graphics_context_set_fill_color(ctx, GColorBlack);
+  // Draw header background
+  #ifdef PBL_COLOR
+    graphics_context_set_fill_color(ctx, NMBS_BLUE);
+  #else
+    graphics_context_set_fill_color(ctx, GColorBlack);
+  #endif
   graphics_fill_rect(ctx, bounds, 0, GCornerNone);
 
   // Draw dotted border on top
@@ -114,7 +164,7 @@ static void menu_draw_row_callback(GContext *ctx,
       station_name = (state_get_num_stations() > 0) ? state_get_stations()[state_get_to_station_index()].name : NULL;
     }
 
-    // Draw icon (16x16) with some padding
+    // Draw icon (16x16) with some padding - keep original size since icons are fixed
     if (icon) {
       GRect icon_rect = GRect(4, 4, 16, 16);
       graphics_context_set_compositing_mode(ctx, GCompOpSet);
@@ -163,8 +213,8 @@ static void menu_draw_row_callback(GContext *ctx,
     graphics_context_set_text_color(ctx, text_color);
     graphics_draw_text(ctx,
                        "Loading...",
-                       fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD),
-                       GRect(4, 12, bounds.size.w - 8, 24),
+                       fonts_get_system_font(MENU_LOADING_FONT),
+                       GRect(MENU_TEXT_MARGIN, (MENU_TRAIN_ROW_HEIGHT - MENU_TIME_RECT_HEIGHT) / 2, bounds.size.w - 2 * MENU_TEXT_MARGIN, MENU_TIME_RECT_HEIGHT),
                        GTextOverflowModeTrailingEllipsis,
                        GTextAlignmentCenter,
                        NULL);
@@ -198,8 +248,8 @@ static void menu_draw_row_callback(GContext *ctx,
 
     graphics_draw_text(ctx,
                        loading_message,
-                       fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD),
-                       GRect(4, 12, bounds.size.w - 8, 24),
+                       fonts_get_system_font(MENU_LOADING_FONT),
+                       GRect(MENU_TEXT_MARGIN, (MENU_TRAIN_ROW_HEIGHT - MENU_TIME_RECT_HEIGHT) / 2, bounds.size.w - 2 * MENU_TEXT_MARGIN, MENU_TIME_RECT_HEIGHT),
                        GTextOverflowModeTrailingEllipsis,
                        GTextAlignmentCenter,
                        NULL);
@@ -213,8 +263,8 @@ static void menu_draw_row_callback(GContext *ctx,
     graphics_context_set_text_color(ctx, text_color);
     graphics_draw_text(ctx,
                        "Connection failed",
-                       fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD),
-                       GRect(4, 10, bounds.size.w - 8, 24),
+                       fonts_get_system_font(MENU_STATION_FONT),
+                       GRect(MENU_TEXT_MARGIN, (MENU_TRAIN_ROW_HEIGHT - MENU_TIME_RECT_HEIGHT) / 2, bounds.size.w - 2 * MENU_TEXT_MARGIN, MENU_TIME_RECT_HEIGHT),
                        GTextOverflowModeTrailingEllipsis,
                        GTextAlignmentCenter,
                        NULL);
@@ -228,8 +278,8 @@ static void menu_draw_row_callback(GContext *ctx,
     graphics_context_set_text_color(ctx, text_color);
     graphics_draw_text(ctx,
                        "No connections found",
-                       fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD),
-                       GRect(4, 10, bounds.size.w - 8, 24),
+                       fonts_get_system_font(MENU_STATION_FONT),
+                       GRect(MENU_TEXT_MARGIN, (MENU_TRAIN_ROW_HEIGHT - MENU_TIME_RECT_HEIGHT) / 2, bounds.size.w - 2 * MENU_TEXT_MARGIN, MENU_TIME_RECT_HEIGHT),
                        GTextOverflowModeTrailingEllipsis,
                        GTextAlignmentCenter,
                        NULL);
@@ -245,8 +295,8 @@ static void menu_draw_row_callback(GContext *ctx,
   GColor platform_text_color = selected ? GColorBlack : GColorWhite;
 
   // Define platform box dimensions (calculated early, drawn later)
-  const int16_t platform_box_size = 24;
-  const int16_t platform_box_margin = 4;
+  const int16_t platform_box_size = MENU_PLATFORM_BOX_SIZE;
+  const int16_t platform_box_margin = MENU_PLATFORM_BOX_MARGIN;
 
   // Calculate platform box position (right side of cell)
   GRect platform_box = GRect(
@@ -257,14 +307,14 @@ static void menu_draw_row_callback(GContext *ctx,
   );
 
   // Draw time range on the left (primary, bold, larger)
-  const int16_t text_margin = 4;
+  const int16_t text_margin = MENU_TEXT_MARGIN;
   static char time_range[32];
 
   GRect time_rect = GRect(
-    text_margin,
+    text_margin - 2,
     0,
     bounds.size.w - platform_box_size - platform_box_margin - text_margin - 4,
-    20
+    MENU_TIME_RECT_HEIGHT
   );
 
   graphics_context_set_text_color(ctx, text_color);
@@ -274,33 +324,110 @@ static void menu_draw_row_callback(GContext *ctx,
   GFont time_font;
 
   if (has_delay) {
-    // Use smaller font and include delay indicators
-    time_font = fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD);
+    // Use smaller font for delayed trains
+    time_font = fonts_get_system_font(MENU_TIME_FONT_DELAYED);
     time_rect.origin.y += 2;  // Slightly lower for smaller font
-    snprintf(time_range, sizeof(time_range), "%s+%d > %s+%d",
-             departure->depart_time,
-             departure->depart_delay,
-             departure->arrive_time,
-             departure->arrive_delay);
+
+    int16_t x_pos = time_rect.origin.x;
+
+    // 1. Draw departure time
+    graphics_context_set_text_color(ctx, text_color);
+    graphics_draw_text(ctx,
+                       departure->depart_time,
+                       time_font,
+                       GRect(x_pos, time_rect.origin.y, time_rect.size.w, time_rect.size.h),
+                       GTextOverflowModeTrailingEllipsis,
+                       GTextAlignmentLeft,
+                       NULL);
+
+    GSize size = graphics_text_layout_get_content_size(
+        departure->depart_time, time_font,
+        GRect(0, 0, 100, time_rect.size.h),
+        GTextOverflowModeTrailingEllipsis, GTextAlignmentLeft);
+    x_pos += size.w;
+
+    // 2. Draw departure delay in red
+    static char depart_delay_str[8];
+    snprintf(depart_delay_str, sizeof(depart_delay_str), "+%d", departure->depart_delay);
+    #ifdef PBL_COLOR
+      graphics_context_set_text_color(ctx, DELAY_COLOR);
+    #endif
+    graphics_draw_text(ctx,
+                       depart_delay_str,
+                       time_font,
+                       GRect(x_pos, time_rect.origin.y, 30, time_rect.size.h),
+                       GTextOverflowModeTrailingEllipsis,
+                       GTextAlignmentLeft,
+                       NULL);
+
+    size = graphics_text_layout_get_content_size(
+        depart_delay_str, time_font,
+        GRect(0, 0, 30, time_rect.size.h),
+        GTextOverflowModeTrailingEllipsis, GTextAlignmentLeft);
+    x_pos += size.w;
+
+    // 3. Draw separator " > "
+    graphics_context_set_text_color(ctx, text_color);
+    graphics_draw_text(ctx,
+                       " > ",
+                       time_font,
+                       GRect(x_pos, time_rect.origin.y, 30, time_rect.size.h),
+                       GTextOverflowModeTrailingEllipsis,
+                       GTextAlignmentLeft,
+                       NULL);
+
+    size = graphics_text_layout_get_content_size(
+        " > ", time_font,
+        GRect(0, 0, 30, time_rect.size.h),
+        GTextOverflowModeTrailingEllipsis, GTextAlignmentLeft);
+    x_pos += size.w;
+
+    // 4. Draw arrival time
+    graphics_draw_text(ctx,
+                       departure->arrive_time,
+                       time_font,
+                       GRect(x_pos, time_rect.origin.y, time_rect.size.w, time_rect.size.h),
+                       GTextOverflowModeTrailingEllipsis,
+                       GTextAlignmentLeft,
+                       NULL);
+
+    size = graphics_text_layout_get_content_size(
+        departure->arrive_time, time_font,
+        GRect(0, 0, 100, time_rect.size.h),
+        GTextOverflowModeTrailingEllipsis, GTextAlignmentLeft);
+    x_pos += size.w;
+
+    // 5. Draw arrival delay in red
+    static char arrive_delay_str[8];
+    snprintf(arrive_delay_str, sizeof(arrive_delay_str), "+%d", departure->arrive_delay);
+    #ifdef PBL_COLOR
+      graphics_context_set_text_color(ctx, DELAY_COLOR);
+    #endif
+    graphics_draw_text(ctx,
+                       arrive_delay_str,
+                       time_font,
+                       GRect(x_pos, time_rect.origin.y, 30, time_rect.size.h),
+                       GTextOverflowModeTrailingEllipsis,
+                       GTextAlignmentLeft,
+                       NULL);
   } else {
     // Use larger font for on-time trains
-    time_font = fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD);
+    time_font = fonts_get_system_font(MENU_TIME_FONT);
     snprintf(time_range, sizeof(time_range), "%s > %s",
              departure->depart_time, departure->arrive_time);
+    graphics_draw_text(ctx,
+                       time_range,
+                       time_font,
+                       time_rect,
+                       GTextOverflowModeTrailingEllipsis,
+                       GTextAlignmentLeft,
+                       NULL);
   }
-
-  graphics_draw_text(ctx,
-                     time_range,
-                     time_font,
-                     time_rect,
-                     GTextOverflowModeTrailingEllipsis,
-                     GTextAlignmentLeft,
-                     NULL);
 
   // Draw train type in small box (below time, on the left)
   const int16_t train_type_box_width = 16;
   const int16_t train_type_box_height = 16;
-  const int16_t train_type_y = 22;
+  const int16_t train_type_y = MENU_TRAIN_TYPE_Y;
 
   GRect train_type_box = GRect(
     text_margin,
@@ -367,7 +494,11 @@ static void menu_draw_row_callback(GContext *ctx,
   }
 
   // Draw masking rectangles to hide overflow text (match the background color)
-  GColor bg_color = selected ? GColorBlack : GColorWhite;
+  #ifdef PBL_COLOR
+    GColor bg_color = selected ? NMBS_BLUE : GColorWhite;
+  #else
+    GColor bg_color = selected ? GColorBlack : GColorWhite;
+  #endif
 
   // Left mask (covers train type box and connection icon if present)
   GRect left_mask = GRect(0, train_type_y, text_margin + train_type_box_width + icon_space + 2, train_type_box_height);
@@ -442,10 +573,16 @@ static void menu_draw_row_callback(GContext *ctx,
 
   // Draw platform box background (drawn last to appear on top)
   if (departure->platform_changed) {
-    // Platform changed - draw outline only
-    graphics_context_set_stroke_color(ctx, platform_bg_color);
-    graphics_context_set_stroke_width(ctx, 1);
-    graphics_draw_round_rect(ctx, platform_box, 2);
+    #ifdef PBL_COLOR
+      // Platform changed - red filled box on color platforms
+      graphics_context_set_fill_color(ctx, PLATFORM_CHANGED_COLOR);
+      graphics_fill_rect(ctx, platform_box, 2, GCornersAll);
+    #else
+      // Platform changed - outline on B&W
+      graphics_context_set_stroke_color(ctx, platform_bg_color);
+      graphics_context_set_stroke_width(ctx, 1);
+      graphics_draw_round_rect(ctx, platform_box, 2);
+    #endif
   } else {
     // Normal platform - filled box
     graphics_context_set_fill_color(ctx, platform_bg_color);
@@ -453,13 +590,17 @@ static void menu_draw_row_callback(GContext *ctx,
   }
 
   // Draw platform number (adjust rect for vertical centering)
-  graphics_context_set_text_color(ctx, departure->platform_changed ? text_color : platform_text_color);
+  #ifdef PBL_COLOR
+    graphics_context_set_text_color(ctx, departure->platform_changed ? GColorWhite : platform_text_color);
+  #else
+    graphics_context_set_text_color(ctx, departure->platform_changed ? text_color : platform_text_color);
+  #endif
   GRect platform_text_rect = platform_box;
-  platform_text_rect.origin.y -= 5;  // Lift upward to vertically center larger font
+  platform_text_rect.origin.y -= MENU_PLATFORM_TEXT_OFFSET;  // Lift upward to vertically center larger font
 
   graphics_draw_text(ctx,
                      departure->platform,
-                     fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD),
+                     fonts_get_system_font(MENU_PLATFORM_FONT),
                      platform_text_rect,
                      GTextOverflowModeTrailingEllipsis,
                      GTextAlignmentCenter,
@@ -473,7 +614,7 @@ static int16_t menu_get_cell_height_callback(MenuLayer *menu_layer,
   if (cell_index->section == 0) {
     return PBL_IF_ROUND_ELSE(
       MENU_CELL_ROUND_FOCUSED_SHORT_CELL_HEIGHT,
-      24  // Shorter height for station selectors
+      MENU_STATION_ROW_HEIGHT
     );
   }
 
@@ -481,7 +622,7 @@ static int16_t menu_get_cell_height_callback(MenuLayer *menu_layer,
   return PBL_IF_ROUND_ELSE(
     menu_layer_is_index_selected(menu_layer, cell_index) ?
       MENU_CELL_ROUND_FOCUSED_SHORT_CELL_HEIGHT : MENU_CELL_ROUND_UNFOCUSED_TALL_CELL_HEIGHT,
-    44  // Standard height for train rows
+    MENU_TRAIN_ROW_HEIGHT
   );
 }
 

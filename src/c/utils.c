@@ -2,6 +2,13 @@
 
 // Helper function to abbreviate station names
 void abbreviate_station_name(const char *input, char *output, size_t output_size) {
+  #if PBL_DISPLAY_HEIGHT == 228
+    // Emery has more space, no abbreviation needed
+    strncpy(output, input, output_size - 1);
+    output[output_size - 1] = '\0';
+    return;
+  #endif
+  
   if (!input || !output || output_size == 0) return;
 
   // Check for prefixes that need abbreviation

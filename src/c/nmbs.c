@@ -29,7 +29,11 @@ static void window_load(Window *window) {
 
   // Create StatusBarLayer
   s_status_bar = status_bar_layer_create();
-  status_bar_layer_set_colors(s_status_bar, GColorBlack, GColorWhite);
+  #ifdef PBL_COLOR
+    status_bar_layer_set_colors(s_status_bar, NMBS_BLUE, GColorWhite);
+  #else
+    status_bar_layer_set_colors(s_status_bar, GColorBlack, GColorWhite);
+  #endif
   layer_add_child(window_layer, status_bar_layer_get_layer(s_status_bar));
 
   // Calculate bounds for MenuLayer (below status bar)
@@ -51,6 +55,11 @@ static void window_load(Window *window) {
 
   // Set up MenuLayer callbacks
   menu_layer_set_callbacks(s_menu_layer, NULL, menu_layer_get_callbacks());
+
+  // Set highlight colors for color platforms (background, foreground)
+  #ifdef PBL_COLOR
+    menu_layer_set_highlight_colors(s_menu_layer, NMBS_BLUE, GColorWhite);
+  #endif
 
   // Add MenuLayer to window
   layer_add_child(window_layer, menu_layer_get_layer(s_menu_layer));
