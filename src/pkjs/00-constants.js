@@ -43,7 +43,7 @@ var CONFIG = {
   MAX_DEPARTURES: 11,            // Limit to 11 departures
   MAX_FAVORITE_STATIONS: 6,      // Maximum favorite stations
   USER_AGENT: 'Commuter <https://github.com/Epse/commuter-pebble>',
-  CONFIG_URL: 'https://assets-eu.gbgk.net/nmbs-pebble/config.html', // TODO change URL to github pages
+  CONFIG_URL: 'https://epse.github.io/commuter-pebble/config.html',
   DEFAULT_LANGUAGE: 'en'         // Default language for API requests
 };
 
