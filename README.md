@@ -4,6 +4,8 @@
 
 A real-time Belgian railway (NMBS/SNCB) train schedule viewer for Pebble smartwatches. Check departures, delays, and platform changes directly from your wrist.
 
+This is a fork of the [original](https://github.com/gbougakov/commuter-pebble), as the original was no longer maintained or pushed updates to Rebble.
+
 [**Download on Rebble →**](https://apps.rebble.io/en_US/application/68fd14f9504cc500097101e2)
 
 ## Features
@@ -70,7 +72,3 @@ Smart schedules automatically switch your route based on the day/time:
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
----
-
-**Made in Leuven by Werknaam**

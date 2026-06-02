@@ -42,8 +42,8 @@ var CONFIG = {
   DEBOUNCE_DELAY: 500,           // milliseconds
   MAX_DEPARTURES: 11,            // Limit to 11 departures
   MAX_FAVORITE_STATIONS: 6,      // Maximum favorite stations
-  USER_AGENT: 'WerknaamCommuter <https://werknaam.be, commuter@werknaam.be>',
-  CONFIG_URL: 'https://assets-eu.gbgk.net/nmbs-pebble/config.html',
+  USER_AGENT: 'Commuter <https://github.com/Epse/commuter-pebble>',
+  CONFIG_URL: 'https://assets-eu.gbgk.net/nmbs-pebble/config.html', // TODO change URL to github pages
   DEFAULT_LANGUAGE: 'en'         // Default language for API requests
 };
 
