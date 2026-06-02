@@ -1,0 +1,35 @@
+name: 'Deploy Config Page'
+on:
+  push:
+    branches:
+      - 'main'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Bundle static files
+        run: |
+          mkdir -p build/pages/
+          cp src/pkjs/config.html build/pages/
+      - name: Upload as artifact
+        id: deployment
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: build/pages/
+  deploy:
+    needs: build
+
+    permissions:
+      pages: write
+      id-token: write
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
